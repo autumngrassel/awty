@@ -1,5 +1,9 @@
 package edu.washington.grassela.arewethereyet;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -8,21 +12,28 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
-
 public class MainActivity extends ActionBarActivity {
+
+    private PendingIntent pendingIntent;
+    private AlarmManager manager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // Retrieve a PendingIntent that will perform a broadcast
+        final Intent alarmIntent = new Intent(this, AlarmReceiver.class);
+        //alarmIntent.putExtra("message", "yest");
+        //pendingIntent = PendingIntent.getBroadcast(this, 0, alarmIntent, 0);
+
         final Button start = (Button) findViewById(R.id.start);
         start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (start.getText().equals("Start")) { // starting messages
-                    String message = ((EditText) findViewById(R.id.message)).getEditableText().toString();
-                    String phoneNumber = ((EditText) findViewById(R.id.phoneNumber)).getEditableText().toString();
+                    String message = getMessage();
+                    String phoneNumber = getPhone();
                     String minutes = ((EditText) findViewById(R.id.minutes)).getEditableText().toString();
                     int minutesApart;
                     try {
@@ -30,17 +41,22 @@ public class MainActivity extends ActionBarActivity {
                     } catch (NumberFormatException nfe) {
                         minutesApart = 0;
                     }
-                    if (minutesApart > 0 && !message.isEmpty() && !phoneNumber.isEmpty()) {
+                    if (minutesApart > 0 && !message.isEmpty() && !phoneNumber.isEmpty()
+                            && phoneNumber.matches("[(]\\d{3}[)][ ]\\d{3}-\\d{4}")) {
+                        alarmIntent.putExtra("message", message);
+                        alarmIntent.putExtra("number", phoneNumber);
+                        pendingIntent = PendingIntent.getBroadcast(MainActivity.this, 0, alarmIntent, 0);
                         start.setText(R.string.stop);
+                        startAlarm(minutesApart);
 
                     }
                 } else { // stopping messages
-
+                    start.setText(R.string.start);
+                    cancelAlarm();
                 }
             }
         });
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -63,4 +79,27 @@ public class MainActivity extends ActionBarActivity {
 
         return super.onOptionsItemSelected(item);
     }
+
+    public void startAlarm(int minutesApart) {
+        manager = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
+        long interval = minutesApart * 60 * 1000;
+
+        manager.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), interval, pendingIntent);
+    }
+
+    public void cancelAlarm() {
+        if (manager != null) {
+            manager.cancel(pendingIntent);
+        }
+
+    }
+
+    public String getMessage() {
+        return ((EditText) findViewById(R.id.message)).getEditableText().toString();
+    }
+
+    public String getPhone() {
+        return ((EditText) findViewById(R.id.phoneNumber)).getEditableText().toString();
+    }
+
 }

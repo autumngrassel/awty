@@ -4,7 +4,7 @@
     <string name="app_name">Are We There Yet?</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="phone">Phone Number</string>
+    <string name="phone">Phone Number \nex: (555) 555&#8211;5555</string>
     <string name="message">Message to Send</string>
     <string name="start">Start</string>
     <string name="minutes">Minutes between messages?</string>
