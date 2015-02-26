@@ -3,7 +3,6 @@ package edu.washington.grassela.arewethereyet;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.widget.EditText;
 import android.widget.Toast;
 
 public class AlarmReceiver extends BroadcastReceiver {
